@@ -304,22 +304,24 @@ function App() {
           <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
           {showModal && submittedData && (
-            <DetailModal
-              candidate={submittedData}
-              title="Interview Details Submitted"
-              onClose={() => setShowModal(false)}
-              formatDateTime={formatDateTime}
-            />
-          )}
+  <DetailModal
+    candidate={submittedData}
+    title={`Interview Support - ${submittedData.name} - ${submittedData.jobTitle} - ${formatDateTime(submittedData.interviewDateTime)}`}
+    onClose={() => setShowModal(false)}
+    formatDateTime={formatDateTime}
+  />
+)}
+
           
-          {viewingCandidate && (
-            <DetailModal
-              candidate={viewingCandidate}
-              title="View Interview Details"
-              onClose={() => setViewingCandidate(null)}
-              formatDateTime={formatDateTime}
-            />
-          )}
+{viewingCandidate && (
+  <DetailModal
+    candidate={viewingCandidate}
+    title={`Interview Support - ${viewingCandidate.name} - ${viewingCandidate.jobTitle} - ${formatDateTime(viewingCandidate.interviewDateTime)}`}
+    onClose={() => setViewingCandidate(null)}
+    formatDateTime={formatDateTime}
+  />
+)}
+
         </div>
       </div>
     </div>
