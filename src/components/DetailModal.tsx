@@ -40,19 +40,26 @@ export function DetailModal({ candidate, title, onClose, formatDateTime }: Detai
   );
 
   return (
-    <Modal isOpen onClose={onClose} title={title}>
-      <div className="overflow-auto">
-        <table className="min-w-full border-collapse">
-          <tbody>
-            {rows.map(({ label, value }) => (
-              <tr key={label} className="border-b">
-                <td className="px-4 py-2 font-semibold text-gray-700 w-1/3">{label}</td>
-                <td className="px-4 py-2 text-gray-800">{value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Modal>
+<Modal isOpen onClose={onClose} title={title}>
+  <div className="overflow-auto">
+    <table className="min-w-full border-collapse border border-black text-black border-spacing-0">
+      <tbody>
+        {rows.map(({ label, value }) => (
+          <tr key={label} className="border-b">
+            {/* label cell: no padding, no extra line-height */}
+            <td className="border border-black p-1 leading-none font-semibold">
+              {label}
+            </td>
+
+            {/* value cell: no padding, no extra line-height */}
+            <td className="border border-black p-1 leading-none w-auto">
+              {value}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Modal>
   );
 }
