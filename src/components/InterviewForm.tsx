@@ -104,7 +104,7 @@ export function InterviewForm({
               onChange={(e) => setFormData({ ...formData, interviewRound: e.target.value })}
             >
               <option value="">Select Round</option>
-              <option value="Scereening">Screening</option>
+              <option value="Screening">Screening</option>
               <option value="1st">1st Round</option>
               <option value="2nd">2nd Round</option>
               <option value="3rd">3rd Round</option>
