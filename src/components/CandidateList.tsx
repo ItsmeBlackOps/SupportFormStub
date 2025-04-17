@@ -1,19 +1,6 @@
 import React from 'react';
 import { Eye, Edit2, Trash2, MoreVertical, Calendar, Clock, Building2 } from 'lucide-react';
-
-interface Candidate {
-  id: string;
-  name: string;
-  gender: string;
-  technology: string;
-  endClient: string;
-  interviewRound: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
-  interviewDateTime: string;
-  duration: string;
-}
+import { Candidate } from '../types';
 
 interface CandidateListProps {
   candidates: Candidate[];
@@ -22,7 +9,7 @@ interface CandidateListProps {
   onDelete: (id: string) => void;
   showActionMenu: string | null;
   setShowActionMenu: (id: string | null) => void;
-  formatDateTime: (dateTime: string) => string;
+  formatDateTime: (dateTime?: string) => string;
 }
 
 export function CandidateList({
@@ -36,15 +23,24 @@ export function CandidateList({
 }: CandidateListProps) {
   if (candidates.length === 0) return null;
 
+  // Determine task type from first candidate
+  const isAssessment = candidates[0].taskType === 'assessment';
+
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* Header */}
       <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Scheduled Interviews</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isAssessment ? 'Scheduled Assessments' : 'Scheduled Interviews'}
+        </h2>
         <p className="mt-1 text-sm text-gray-500">
-          {candidates.length} {candidates.length === 1 ? 'interview' : 'interviews'} scheduled
+          {candidates.length} {isAssessment
+            ? (candidates.length === 1 ? 'assessment' : 'assessments')
+            : (candidates.length === 1 ? 'interview' : 'interviews')} scheduled
         </p>
       </div>
 
+      {/* List Items */}
       <div className="divide-y divide-gray-200">
         {candidates.map((candidate) => (
           <div
@@ -52,23 +48,35 @@ export function CandidateList({
             className="p-6 hover:bg-gray-50 transition-colors duration-150"
           >
             <div className="flex justify-between items-start">
-              <div className="space-y-4 flex-1">
-                {/* Header */}
+              <div className="flex-1 space-y-4">
+                {/* Candidate Info */}
                 <div>
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-medium text-gray-900">{candidate.name}</h3>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      {candidate.interviewRound} Round
+                      {candidate.taskType === 'interview'
+                        ? `${candidate.interviewRound} Round`
+                        : `Due ${candidate.assessmentDeadline}`}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">{candidate.jobTitle} • {candidate.technology}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {candidate.taskType === 'interview'
+                      ? `${candidate.jobTitle} • ${candidate.technology}`
+                      : candidate.technology}
+                  </p>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{formatDateTime(candidate.interviewDateTime)}</span>
+                    <span className="text-sm text-gray-600">
+                      {formatDateTime(
+                        candidate.taskType === 'interview'
+                          ? candidate.interviewDateTime
+                          : candidate.assessmentDeadline
+                      )}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-gray-400" />
@@ -86,7 +94,7 @@ export function CandidateList({
                 </div>
               </div>
 
-              {/* Actions Menu */}
+              {/* Action Menu */}
               <div className="relative ml-4">
                 <button
                   onClick={() => setShowActionMenu(showActionMenu === candidate.id ? null : candidate.id)}

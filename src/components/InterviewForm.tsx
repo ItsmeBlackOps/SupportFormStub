@@ -1,19 +1,7 @@
 import React from 'react';
 import { Save } from 'lucide-react';
 import { AutocompleteInput } from './AutocompleteInput';
-
-interface FormData {
-  name: string;
-  gender: string;
-  technology: string;
-  endClient: string;
-  interviewRound: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
-  interviewDateTime: string;
-  duration: string;
-}
+import { FormData } from '../types';
 
 interface AutocompleteData {
   names: Set<string>;
@@ -31,12 +19,12 @@ interface InterviewFormProps {
   isEditing: boolean;
 }
 
-export function InterviewForm({ 
-  formData, 
-  setFormData, 
-  autocompleteData, 
+export function InterviewForm({
+  formData,
+  setFormData,
+  autocompleteData,
   onSubmit,
-  isEditing 
+  isEditing,
 }: InterviewFormProps) {
   return (
     <div className="bg-white shadow rounded-lg p-6 mb-8">
@@ -48,6 +36,7 @@ export function InterviewForm({
             value={formData.name}
             options={[...autocompleteData.names]}
             onChange={(value) => setFormData({ ...formData, name: value })}
+            onOptionSelect={(value) => setFormData({ ...formData, name: value })}
             required
           />
 
@@ -75,6 +64,7 @@ export function InterviewForm({
             value={formData.technology}
             options={[...autocompleteData.technologies]}
             onChange={(value) => setFormData({ ...formData, technology: value })}
+            onOptionSelect={(value) => setFormData({ ...formData, technology: value })}
             required
           />
 
@@ -100,7 +90,7 @@ export function InterviewForm({
               id="interviewRound"
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={formData.interviewRound}
+              value={formData.interviewRound || ''}
               onChange={(e) => setFormData({ ...formData, interviewRound: e.target.value })}
             >
               <option value="">Select Round</option>
@@ -121,7 +111,7 @@ export function InterviewForm({
               id="jobTitle"
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={formData.jobTitle}
+              value={formData.jobTitle || ''}
               onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
             />
           </div>
@@ -132,6 +122,7 @@ export function InterviewForm({
             value={formData.email}
             options={[...autocompleteData.emails]}
             onChange={(value) => setFormData({ ...formData, email: value })}
+            onOptionSelect={(value) => setFormData({ ...formData, email: value })}
             type="email"
             pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
             required
@@ -143,6 +134,7 @@ export function InterviewForm({
             value={formData.phone}
             options={[...autocompleteData.phones]}
             onChange={(value) => setFormData({ ...formData, phone: value })}
+            onOptionSelect={(value) => setFormData({ ...formData, phone: value })}
             type="tel"
             pattern="[0-9\s-()]+"
             required
@@ -157,7 +149,7 @@ export function InterviewForm({
               id="interviewDateTime"
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={formData.interviewDateTime}
+              value={formData.interviewDateTime || ''}
               onChange={(e) => setFormData({ ...formData, interviewDateTime: e.target.value })}
             />
           </div>
@@ -170,8 +162,8 @@ export function InterviewForm({
               type="number"
               id="duration"
               required
-              min="15"
-              max="180"
+              min={15}
+              max={180}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
