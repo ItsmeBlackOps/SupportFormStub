@@ -40,6 +40,14 @@ export default function App() {
     endClient: '',
     email: '',
     phone: '',
+    // optional fields
+    jobTitle: '',
+    interviewRound: '',
+    interviewDateTime: '',
+    assessmentDeadline: '',
+    availabilityDateTime: '',
+    mockMode: undefined,
+    remarks: '',
     duration: '60',
   });
 
@@ -59,7 +67,11 @@ export default function App() {
       setCandidates(parsed);
       // build autocomplete sets
       const auto: AutocompleteData = {
-        names: new Set(), genders: new Set(), technologies: new Set(), emails: new Set(), phones: new Set()
+        names: new Set(),
+        genders: new Set(),
+        technologies: new Set(),
+        emails: new Set(),
+        phones: new Set(),
       };
       parsed.forEach(c => {
         auto.names.add(c.name);
@@ -87,7 +99,10 @@ export default function App() {
           try {
             const data = new FormData();
             data.append('file', blob);
-            const res = await fetch('https://blackops.tunn.dev/parse-candidate/', { method: 'POST', body: data });
+            const res = await fetch('https://blackops.tunn.dev/parse-candidate/', {
+              method: 'POST',
+              body: data
+            });
             if (!res.ok) throw new Error(res.statusText);
             const json = await res.json();
             setFormData(prev => ({
@@ -99,7 +114,10 @@ export default function App() {
               phone: json.contact_number || prev.phone,
             }));
           } catch (err) {
-            setAnalysisError({ message: err instanceof Error ? err.message : String(err), timestamp: Date.now() });
+            setAnalysisError({
+              message: err instanceof Error ? err.message : String(err),
+              timestamp: Date.now()
+            });
           } finally {
             setIsAnalyzing(false);
           }
@@ -113,13 +131,16 @@ export default function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // assemble new candidate
-    const newCand: Candidate = { id: editingCandidate?.id || crypto.randomUUID(), ...formData };
+    const newCand: Candidate = {
+      id: editingCandidate?.id || crypto.randomUUID(),
+      ...formData
+    };
     const updated = editingCandidate
       ? candidates.map(c => c.id === editingCandidate.id ? newCand : c)
       : [...candidates, newCand];
     setCandidates(updated);
     localStorage.setItem('candidates', JSON.stringify(updated));
+
     // update autocomplete
     setAutocompleteData(prev => ({
       names: new Set(prev.names).add(newCand.name),
@@ -128,11 +149,28 @@ export default function App() {
       emails: new Set(prev.emails).add(newCand.email),
       phones: new Set(prev.phones).add(newCand.phone),
     }));
+
     setSubmittedData(newCand);
     setShowModal(true);
     setEditingCandidate(null);
     setActiveTab('scheduled');
-    setFormData({ taskType: 'interview', name: '', gender: '', technology: '', endClient: '', email: '', phone: '', duration: '60' });
+    setFormData({
+      taskType: newCand.taskType,
+      name: '',
+      gender: '',
+      technology: '',
+      endClient: '',
+      email: '',
+      phone: '',
+      jobTitle: '',
+      interviewRound: '',
+      interviewDateTime: '',
+      assessmentDeadline: '',
+      availabilityDateTime: '',
+      mockMode: undefined,
+      remarks: '',
+      duration: '60',
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -140,7 +178,13 @@ export default function App() {
     setCandidates(updated);
     localStorage.setItem('candidates', JSON.stringify(updated));
     // rebuild autocomplete
-    const auto: AutocompleteData = { names: new Set(), genders: new Set(), technologies: new Set(), emails: new Set(), phones: new Set() };
+    const auto: AutocompleteData = {
+      names: new Set(),
+      genders: new Set(),
+      technologies: new Set(),
+      emails: new Set(),
+      phones: new Set(),
+    };
     updated.forEach(c => {
       auto.names.add(c.name);
       auto.genders.add(c.gender);
@@ -161,25 +205,72 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Formatting helpers
   const formatDateTime = (dt?: string) => dt
-    ? new Intl.DateTimeFormat('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York',hour12:true}).format(new Date(dt)) + ' (EDT)'
+    ? new Intl.DateTimeFormat('en-US', {
+        weekday: 'short', year: 'numeric', month: 'short',
+        day: 'numeric', hour: 'numeric', minute: '2-digit',
+        timeZone: 'America/New_York', hour12: true
+      }).format(new Date(dt)) + ' (EDT)'
     : '';
 
   const formatDate = (d?: string) => d
-    ? new Intl.DateTimeFormat('en-US',{year:'numeric',month:'short',day:'numeric',timeZone:'America/New_York'}).format(new Date(d))
+    ? new Intl.DateTimeFormat('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        timeZone: 'America/New_York'
+      }).format(new Date(d))
     : '';
 
+  // Modal title builder per taskType
+  const getModalTitle = (c: Candidate) => {
+    switch (c.taskType) {
+      case 'interview':
+        return `Interview Support — ${c.name} — ${c.jobTitle} — ${formatDateTime(c.interviewDateTime)}`;
+      case 'assessment':
+        return `Assessment Support — ${c.name} — Due ${formatDate(c.assessmentDeadline)}`;
+      case 'mock':
+        return `Mock Interview — ${c.name} — ${formatDateTime(c.availabilityDateTime)}`;
+      case 'resumeUnderstanding':
+        return `Resume Understanding — ${c.name} — ${formatDateTime(c.availabilityDateTime)}`;
+      case 'resumeReview':
+        return `Resume Review — ${c.name}`;
+      default:
+        return c.name;
+    }
+  };
+
   const tabs = [
-    { id: 'new', label: 'New', icon: Plus, content: (
+    {
+      id: 'new', label: 'New', icon: Plus, content: (
         <>
           {isAnalyzing && <LoadingOverlay isVisible={isAnalyzing} />}
-          {analysisError && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md"><p className="text-sm text-red-600">{analysisError.message}</p></div>}
-          <CandidateForm formData={formData} setFormData={setFormData} autocompleteData={autocompleteData} onSubmit={handleSubmit} isEditing={!!editingCandidate} />
+          {analysisError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{analysisError.message}</p>
+            </div>
+          )}
+          <CandidateForm
+            formData={formData}
+            setFormData={setFormData}
+            autocompleteData={autocompleteData}
+            onSubmit={handleSubmit}
+            isEditing={!!editingCandidate}
+          />
         </>
       )
     },
-    { id: 'scheduled', label: 'Scheduled', icon: CalendarIcon, content:
-        <CandidateList candidates={candidates} onView={setViewingCandidate} onEdit={handleEdit} onDelete={handleDelete} showActionMenu={showActionMenu} setShowActionMenu={setShowActionMenu} formatDateTime={dt => formatDateTime(dt)} />
+    {
+      id: 'scheduled', label: 'Scheduled', icon: CalendarIcon, content: (
+        <CandidateList
+          candidates={candidates}
+          onView={setViewingCandidate}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          showActionMenu={showActionMenu}
+          setShowActionMenu={setShowActionMenu}
+          formatDateTime={formatDateTime}
+        />
+      )
     }
   ];
 
@@ -192,22 +283,37 @@ export default function App() {
             <h1 className="ml-3 text-2xl font-semibold text-gray-900">Support Manager</h1>
           </div>
         </div>
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={tab => setActiveTab(tab as 'new'|'scheduled')} />
+
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={tab => setActiveTab(tab as 'new' | 'scheduled')}
+        />
 
         {showModal && submittedData && (
-          <DetailModal candidate={submittedData} title={
-            submittedData.taskType === 'interview'
-              ? `Interview Support - ${submittedData.name} - ${submittedData.jobTitle} - ${formatDateTime(submittedData.interviewDateTime)}`
-              : `Assessment Support - ${submittedData.name} - Due ${submittedData.assessmentDeadline}`
-          } onClose={() => setShowModal(false)} formatDateTime={dt => submittedData.taskType === 'interview' ? formatDateTime(dt) : formatDate(dt)} />
+          <DetailModal
+            candidate={submittedData}
+            title={getModalTitle(submittedData)}
+            onClose={() => setShowModal(false)}
+            formatDateTime={dt =>
+              submittedData.taskType === 'assessment'
+                ? formatDate(dt)
+                : formatDateTime(dt)
+            }
+          />
         )}
 
         {viewingCandidate && (
-          <DetailModal candidate={viewingCandidate} title={
-            viewingCandidate.taskType === 'interview'
-              ? `Interview Support - ${viewingCandidate.name} - ${viewingCandidate.jobTitle} - ${formatDateTime(viewingCandidate.interviewDateTime)}`
-              : `Assessment Support - ${viewingCandidate.name} - Due ${viewingCandidate.assessmentDeadline}`
-          } onClose={() => setViewingCandidate(null)} formatDateTime={dt => viewingCandidate.taskType === 'interview' ? formatDateTime(dt) : formatDate(dt)} />
+          <DetailModal
+            candidate={viewingCandidate}
+            title={getModalTitle(viewingCandidate)}
+            onClose={() => setViewingCandidate(null)}
+            formatDateTime={dt =>
+              viewingCandidate.taskType === 'assessment'
+                ? formatDate(dt)
+                : formatDateTime(dt)
+            }
+          />
         )}
       </div>
     </div>

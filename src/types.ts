@@ -1,4 +1,9 @@
-export type TaskType = 'interview' | 'assessment';
+export type TaskType =
+  | 'interview'
+  | 'assessment'
+  | 'mock'             // ← new
+  | 'understanding'   // ← new
+  | 'review';         // ← new
 
 /**
  * FormData represents the fields captured by the CandidateForm.
@@ -17,6 +22,10 @@ export interface FormData {
   interviewDateTime?: string;  // only for interviews
   duration: string;
   assessmentDeadline?: string; // only for assessments
+  availabilityDateTime?: string;  // ← new
+  remarks?: string;               // ← new
+  mockMode?: 'Evaluation' | 'Training'; // ← new dropdown
+  understandingAvailability?: string;
 }
 
 /**
@@ -24,4 +33,5 @@ export interface FormData {
  */
 export interface Candidate extends FormData {
   id: string;
+  duration?: string;
 }

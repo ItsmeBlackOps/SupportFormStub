@@ -38,16 +38,37 @@ export function CandidateForm({
           <select
             id="taskType"
             value={formData.taskType}
-            onChange={(e) => setFormData({ ...formData, taskType: e.target.value as TaskType })}
+            onChange={(e) => setFormData({
+              // reset fields when switching types
+              taskType: e.target.value as TaskType,
+              name: '',
+              gender: '',
+              technology: '',
+              endClient: '',
+              email: '',
+              phone: '',
+              jobTitle: '',
+              interviewRound: '',
+              interviewDateTime: '',
+              assessmentDeadline: '',
+              availabilityDateTime: '',
+              mockMode: undefined,
+              remarks: '',
+              duration: ''
+            })}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="interview">Interview Support</option>
             <option value="assessment">Assessment Support</option>
+            <option value="mock">Mock Interview</option>
+            <option value="resumeUnderstanding">Resume Understanding</option>
+            <option value="resumeReview">Resume Review</option>
           </select>
         </div>
 
         {/* Shared Fields */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Name */}
           <AutocompleteInput
             id="name"
             label="Candidate Name"
@@ -58,6 +79,7 @@ export function CandidateForm({
             required
           />
 
+          {/* Gender */}
           <div>
             <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
               Gender
@@ -72,10 +94,10 @@ export function CandidateForm({
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
-              {/* <option value="Other">Other</option> */}
             </select>
           </div>
 
+          {/* Technology */}
           <AutocompleteInput
             id="technology"
             label="Technology"
@@ -86,20 +108,24 @@ export function CandidateForm({
             required
           />
 
-          <div>
-            <label htmlFor="endClient" className="block text-sm font-medium text-gray-700">
-              End Client
-            </label>
-            <input
-              type="text"
-              id="endClient"
-              value={formData.endClient}
-              required
-              onChange={(e) => setFormData({ ...formData, endClient: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
+          {/* End Client (only for interview, assessment, mock) */}
+          {['interview', 'assessment'].includes(formData.taskType) && (
+            <div>
+              <label htmlFor="endClient" className="block text-sm font-medium text-gray-700">
+                End Client
+              </label>
+              <input
+                type="text"
+                id="endClient"
+                value={formData.endClient}
+                required
+                onChange={(e) => setFormData({ ...formData, endClient: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+          )}
 
+          {/* Email */}
           <AutocompleteInput
             id="email"
             label="Email ID"
@@ -112,6 +138,7 @@ export function CandidateForm({
             required
           />
 
+          {/* Phone */}
           <AutocompleteInput
             id="phone"
             label="Contact Number"
@@ -174,42 +201,155 @@ export function CandidateForm({
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
+
+              <div>
+                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                  Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  id="duration"
+                  value={formData.duration}
+                  required
+                  min={15}
+                  max={180}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
             </>
           )}
 
           {/* Assessment-only Field */}
           {formData.taskType === 'assessment' && (
+            <>
+              <div>
+                <label htmlFor="assessmentDeadline" className="block text-sm font-medium text-gray-700">
+                  Assessment Deadline
+                </label>
+                <input
+                  type="date"
+                  id="assessmentDeadline"
+                  value={formData.assessmentDeadline || ''}
+                  required
+                  onChange={(e) => setFormData({ ...formData, assessmentDeadline: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                  Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  id="duration"
+                  value={formData.duration}
+                  required
+                  min={15}
+                  max={180}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Mock Interview Fields */}
+          {formData.taskType === 'mock' && (
+            <>
+              <div>
+                <label htmlFor="availabilityDateTime" className="block text-sm font-medium text-gray-700">
+                  Availability (Date & Time)
+                </label>
+                <input
+                  type="datetime-local"
+                  id="availabilityDateTime"
+                  value={formData.availabilityDateTime || ''}
+                  required
+                  onChange={(e) => setFormData({ ...formData, availabilityDateTime: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="mockMode" className="block text-sm font-medium text-gray-700">
+                  Mode
+                </label>
+                <select
+                  id="mockMode"
+                  value={formData.mockMode || ''}
+                  required
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    mockMode: e.target.value as 'Evaluation' | 'Training'
+                  })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="">Select Mode</option>
+                  <option value="Evaluation">Evaluation</option>
+                  <option value="Training">Training</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">
+                  Remarks
+                </label>
+                <textarea
+                  id="remarks"
+                  value={formData.remarks || ''}
+                  required
+                  onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Resume Understanding Fields */}
+          {formData.taskType === 'resumeUnderstanding' && (
+            <>
+              <div>
+                <label htmlFor="availabilityDateTime" className="block text-sm font-medium text-gray-700">
+                  Availability (Date & Time)
+                </label>
+                <input
+                  type="datetime-local"
+                  id="availabilityDateTime"
+                  value={formData.availabilityDateTime || ''}
+                  required
+                  onChange={(e) => setFormData({ ...formData, availabilityDateTime: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">
+                  Remarks
+                </label>
+                <textarea
+                  id="remarks"
+                  value={formData.remarks || ''}
+                  required
+                  onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Resume Review Fields */}
+          {formData.taskType === 'resumeReview' && (
             <div>
-              <label htmlFor="assessmentDeadline" className="block text-sm font-medium text-gray-700">
-                Assessment Deadline
+              <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">
+                Remarks
               </label>
-              <input
-                type="date"
-                id="assessmentDeadline"
-                value={formData.assessmentDeadline || ''}
+              <textarea
+                id="remarks"
+                value={formData.remarks || ''}
                 required
-                onChange={(e) => setFormData({ ...formData, assessmentDeadline: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           )}
-
-          {/* Duration */}
-          <div>
-            <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-              Duration (minutes)
-            </label>
-            <input
-              type="number"
-              id="duration"
-              value={formData.duration}
-              required
-              min={15}
-              max={180}
-              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
         </div>
 
         <button
